@@ -5,10 +5,10 @@ TICKET_CHANNEL_ID = 1255158325591670844
 
 class Ticket(BaseCommand):
     def __init__(self):
-        super().__init__()
-        self.name = "ticket"
-        self.aliases = ["guide","t"]
-        self.description = "Shows a step-by-step guide on how to open a support ticket"
+        description = "Shows a step-by-step guide on how to open a support ticket"
+        params = None
+        aliases = ["guide","t"]
+        super().__init__(description, params, aliases)
 
     async def handle(self, params, message, client):
         """Display the ticket guide with pagination"""
