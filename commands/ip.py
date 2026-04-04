@@ -13,6 +13,7 @@ class Ip(BaseCommand):
 
     async def handle(self, params, message, client):
         server_ip = "bryxelrealm.wither.host"
+        no_ip = "23.109.123.215:25614"
         server_version = "1.21.10"
 
         embed = discord.Embed(
@@ -21,7 +22,10 @@ class Ip(BaseCommand):
             color=discord.Color.teal()
         )
         embed.add_field(name="Server IP", value=f"`{server_ip}`", inline=False)
+        embed.add_field(name="Server IP", value=f"`{no_ip}`", inline=False)
+
         embed.add_field(name="Minecraft Version", value=server_version, inline=False)
+
         embed.set_footer(text="Tip: You can copy the IP text from the embed directly.")
 
         # This button is link-style because Discord does not support clipboard copy.
