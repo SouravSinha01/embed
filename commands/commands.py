@@ -13,54 +13,93 @@ class Commands(BaseCommand):
     async def handle(self, params, message, client):
         from message_handler import COMMAND_HANDLERS
         import discord
+        from discord.ui import View, Button
 
-        # Base embed
-        embed = discord.Embed(
-            title="✦ Command Center",
-            description=f"Prefix → `{settings.COMMAND_PREFIX}`\n──────────────\n",
-            color=discord.Color.from_rgb(88, 101, 242)  # soft blurple
-        )
-
-        # Add bot avatar (clean visual touch)
-        if client.user.avatar:
-            embed.set_thumbnail(url=client.user.avatar.url)
-
-        command_lines = []
+        # ---- Prepare commands ----
         seen_commands = set()
+        commands_list = []
 
         for name, cmd_obj in sorted(COMMAND_HANDLERS.items()):
             if cmd_obj.name not in seen_commands:
                 seen_commands.add(cmd_obj.name)
 
-                # Format aliases
                 aliases = ""
                 if cmd_obj.aliases:
-                    aliases = "\n↳ aliases: " + ", ".join(
+                    aliases = "\n↳ " + ", ".join(
                         f"`{settings.COMMAND_PREFIX}{a}`" for a in cmd_obj.aliases
                     )
 
-                # Clean description
                 clean_desc = (
                     cmd_obj.description.split(": ", 1)[1]
                     if ": " in cmd_obj.description
                     else cmd_obj.description
                 )
 
-                # Build each command block (compact + styled)
-                line = (
-                    f"⚡ **`{settings.COMMAND_PREFIX}{cmd_obj.name}`**"
-                    f"{aliases}\n➤ {clean_desc}"
+                commands_list.append({
+                    "name": cmd_obj.name,
+                    "aliases": aliases,
+                    "desc": clean_desc
+                })
+
+        # ---- Pagination setup ----
+        PER_PAGE = 5
+        pages = [
+            commands_list[i:i + PER_PAGE]
+            for i in range(0, len(commands_list), PER_PAGE)
+        ]
+
+        # ---- Embed generator ----
+        def get_embed(page_index):
+            embed = discord.Embed(
+                title="✦ Command Center",
+                description=f"Prefix → `{settings.COMMAND_PREFIX}`\n──────────────\n",
+                color=discord.Color.from_rgb(88, 101, 242)
+            )
+
+            if client.user.avatar:
+                embed.set_thumbnail(url=client.user.avatar.url)
+
+            for cmd in pages[page_index]:
+                embed.description += (
+                    f"\n⚡ **`{settings.COMMAND_PREFIX}{cmd['name']}`**"
+                    f"{cmd['aliases']}\n➤ {cmd['desc']}\n"
                 )
 
-                command_lines.append(line)
+            embed.set_footer(
+                text=f"Page {page_index + 1}/{len(pages)} • {len(commands_list)} commands",
+                icon_url=message.author.avatar.url if message.author.avatar else None
+            )
 
-        # Join everything into ONE clean layout
-        embed.description += "\n\n".join(command_lines)
+            return embed
 
-        # Footer (minimal + informative)
-        embed.set_footer(
-            text=f"{len(command_lines)} commands • Requested by {message.author.display_name}",
-            icon_url=message.author.avatar.url if message.author.avatar else None
-        )
+        # ---- View (buttons) ----
+        class HelpView(View):
+            def __init__(self):
+                super().__init__(timeout=60)
+                self.page = 0
 
-        await message.channel.send(embed=embed)
+            async def update(self, interaction):
+                await interaction.response.edit_message(
+                    embed=get_embed(self.page),
+                    view=self
+                )
+
+            @discord.ui.button(label="◀", style=discord.ButtonStyle.secondary)
+            async def previous(self, interaction: discord.Interaction, button: Button):
+                if interaction.user != message.author:
+                    return await interaction.response.send_message("Not your menu.", ephemeral=True)
+
+                self.page = (self.page - 1) % len(pages)
+                await self.update(interaction)
+
+            @discord.ui.button(label="▶", style=discord.ButtonStyle.secondary)
+            async def next(self, interaction: discord.Interaction, button: Button):
+                if interaction.user != message.author:
+                    return await interaction.response.send_message("Not your menu.", ephemeral=True)
+
+                self.page = (self.page + 1) % len(pages)
+                await self.update(interaction)
+
+        # ---- Send initial message ----
+        view = HelpView()
+        await message.channel.send(embed=get_embed(0), view=view)
