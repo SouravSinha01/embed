@@ -31,7 +31,4 @@ class Code(BaseCommand):
             icon_url=message.author.avatar.url if message.author.avatar else None
         )
 
-        await message.channel.send(
-            file=discord.File("mc_colors.png", filename="mc_colors.png"),
-            embed=embed
-        )
+        await message.channel.send(embed=embed)
