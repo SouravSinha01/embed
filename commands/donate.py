@@ -7,7 +7,7 @@ class Donate(BaseCommand):
     def __init__(self):
         description = "Shows the Bryxel Realm webshop and website links"
         params = None
-        aliases = ["store", "shop", "website" "site"]
+        aliases = ["store", "shop", "website" ,"site"]
         super().__init__(description, params, aliases)
 
     async def handle(self, params, message, client):
