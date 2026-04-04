@@ -12,3 +12,4 @@ tzlocal
 websockets
 watchdog
 Flask
+psutil
