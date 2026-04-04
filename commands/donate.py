@@ -1,4 +1,4 @@
-﻿import discord
+import discord
 from commands.base_command import BaseCommand
 
 
@@ -19,12 +19,12 @@ class Donate(BaseCommand):
 
         embed.add_field(
             name="Webshop",
-            value="[https://bryxel-realm.tebex.io/](https://bryxel-realm.tebex.io/)",
+            value="[Open the webshop](https://bryxel-realm.tebex.io/)",
             inline=False
         )
         embed.add_field(
             name="Website",
-            value="[https://bryxelrealm.github.io/BryxelRealm.com/](https://bryxelrealm.github.io/BryxelRealm.com/)",
+            value="[Open the website](https://bryxelrealm.github.io/BryxelRealm.com/)",
             inline=False
         )
 
@@ -34,4 +34,18 @@ class Donate(BaseCommand):
             icon_url=message.author.avatar.url if message.author.avatar else None
         )
 
-        await message.channel.send(embed=embed)
+        view = discord.ui.View()
+        view.add_item(discord.ui.Button(
+            label="Webshop",
+            style=discord.ButtonStyle.link,
+            url="https://bryxel-realm.tebex.io/",
+            emoji="🛒"
+        ))
+        view.add_item(discord.ui.Button(
+            label="Website",
+            style=discord.ButtonStyle.link,
+            url="https://bryxelrealm.github.io/BryxelRealm.com/",
+            emoji="🌐"
+        ))
+
+        await message.channel.send(embed=embed, view=view)
