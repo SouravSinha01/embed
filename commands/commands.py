@@ -2,8 +2,6 @@ from commands.base_command import BaseCommand
 import settings
 
 
-# This is a convenient command that automatically generates a helpful
-# message showing all available commands
 class Commands(BaseCommand):
 
     def __init__(self):
@@ -16,32 +14,53 @@ class Commands(BaseCommand):
         from message_handler import COMMAND_HANDLERS
         import discord
 
+        # Base embed
         embed = discord.Embed(
-            title="Bot Commands Help",
-            description=f"Use `{settings.COMMAND_PREFIX}<command>` to execute a command.\n\n**Available Commands:**",
-            color=discord.Color.blue()
+            title="✦ Command Center",
+            description=f"Prefix → `{settings.COMMAND_PREFIX}`\n──────────────\n",
+            color=discord.Color.from_rgb(88, 101, 242)  # soft blurple
         )
 
-        # Group commands by their main name (avoid duplicates from aliases)
+        # Add bot avatar (clean visual touch)
+        if client.user.avatar:
+            embed.set_thumbnail(url=client.user.avatar.url)
+
+        command_lines = []
         seen_commands = set()
+
         for name, cmd_obj in sorted(COMMAND_HANDLERS.items()):
             if cmd_obj.name not in seen_commands:
                 seen_commands.add(cmd_obj.name)
-                
-                # Build usage string
-                usage = f"`{settings.COMMAND_PREFIX}{cmd_obj.name}`"
+
+                # Format aliases
+                aliases = ""
                 if cmd_obj.aliases:
-                    usage += f" (aliases: {', '.join(f'`{settings.COMMAND_PREFIX}{a}`' for a in cmd_obj.aliases)})"
-                
-                # Clean description (remove the formatted prefix part)
-                clean_desc = cmd_obj.description.split(": ", 1)[1] if ": " in cmd_obj.description else cmd_obj.description
-                
-                embed.add_field(
-                    name=usage,
-                    value=clean_desc,
-                    inline=False
+                    aliases = "\n↳ aliases: " + ", ".join(
+                        f"`{settings.COMMAND_PREFIX}{a}`" for a in cmd_obj.aliases
+                    )
+
+                # Clean description
+                clean_desc = (
+                    cmd_obj.description.split(": ", 1)[1]
+                    if ": " in cmd_obj.description
+                    else cmd_obj.description
                 )
 
-        embed.set_footer(text=f"Requested by {message.author.display_name}", icon_url=message.author.avatar.url if message.author.avatar else None)
+                # Build each command block (compact + styled)
+                line = (
+                    f"⚡ **`{settings.COMMAND_PREFIX}{cmd_obj.name}`**"
+                    f"{aliases}\n➤ {clean_desc}"
+                )
+
+                command_lines.append(line)
+
+        # Join everything into ONE clean layout
+        embed.description += "\n\n".join(command_lines)
+
+        # Footer (minimal + informative)
+        embed.set_footer(
+            text=f"{len(command_lines)} commands • Requested by {message.author.display_name}",
+            icon_url=message.author.avatar.url if message.author.avatar else None
+        )
 
         await message.channel.send(embed=embed)
