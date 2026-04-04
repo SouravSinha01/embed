@@ -34,9 +34,9 @@ class Vote(BaseCommand):
 
         # MINECRAFT SERVERS-NET
         view.add_item(discord.ui.Button(
-            label="MINECRAFT SERVERS-NET",
+            label="MINECRAFT SERVERS-ORG",
             style=discord.ButtonStyle.link,
-            url="https://minecraft-server.net/vote/BryxelRealm/",
+            url="https://minecraftservers.org/server/685373",
             emoji="🌐"
         ))
 
