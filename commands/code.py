@@ -15,7 +15,7 @@ class Code(BaseCommand):
 
         embed = discord.Embed(
             title="🎨 Minecraft Color & Format Codes",
-            description=f"Use `{settings.COMMAND_PREFIX}&<code>` inside chat.\n──────────────",
+            description=f"Use `&<code>` in ingame chat.\n──────────────",
             color=discord.Color.from_rgb(88, 101, 242)
         )
 
