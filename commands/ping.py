@@ -11,7 +11,7 @@ class Ip(BaseCommand):
     def __init__(self):
         description = "Show server IP details and info"
         params = None
-        aliases = ["serverip", "address"]
+        aliases = ["stats", "ping"]
         super().__init__(description, params, aliases)
 
     async def handle(self, params, message, client):
